@@ -9,6 +9,8 @@ could be contaminated with material from the surfaces it touches, is
 normally hidden in a sleeve and protected from accidental touches by the
 user.
 
+![](photo/usage.jpg)
+
 The model is almost totally parametric, so you can change everything -
 make it taller or wider, change some functionality, use different means
 of attachment, generate different quality - by changing variables in the

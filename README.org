@@ -65,13 +65,14 @@ These are the steps for assembly:
 
 [[file:photo/assembly-step1.jpg]]
 
-1. Thread the rubber band into the body on both sides. The body has a cavity at
-   the bottom with rows of posts that are meant for this purpose. Find a
-   configuration where your rubber band extends in at least one loop below the body for 1-2 cm (not longer).
+Thread the rubber band into the body on both sides. The body has a cavity at the
+   bottom with rows of posts that are meant for this purpose. Find a
+   configuration where your rubber band extends in at least one loop below the
+   body for 1-2 cm (not longer).
 
 [[file:photo/assembly-step2.jpg]]
 
-2. Thread the body and rubber band into the sleeve from the top. The sleeve has
+Thread the body and rubber band into the sleeve from the top. The sleeve has
    raised triangles above and below the slots; this is the direction where the
    tip of the tool should point. Then pull the loop end of the rubber through
    the bottom of the sleeve. Use a paperclip or similar if it gets fiddly, which
@@ -79,19 +80,19 @@ These are the steps for assembly:
 
 [[file:photo/assembly-step3.jpg]]
 
-4. Put the end cap into the rubber loop so that the rubber strands run in the
+Put the end cap into the rubber loop so that the rubber strands run in the
    groove around the endcap, and attach the endcap to the sleeve. It should sit
    snugly, and the rubber should not be too loose. Screw the endcap into the
    body using an M3x6 bolt and a hex nut.
 
 [[file:photo/assembly-step4.jpg]]
 
-5. Insert an M3x14 bolt and hex nut into the two parts of the printed central
+Insert an M3x14 bolt and hex nut into the two parts of the printed central
    bolt, and attach them through the central hole.
 
 [[file:photo/assembly-step5.jpg]]
 
-6. (optional) Thread your lanyard through the slot in the endcap.
+(optional) Thread your lanyard through the slot in the endcap.
 
 [[file:photo/assembly-step6.jpg]]
 

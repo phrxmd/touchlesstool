@@ -16,6 +16,10 @@ make it taller or wider, change some functionality, use different means
 of attachment, generate different quality - by changing variables in the
 SCAD file.
 
+STLs for printing can be found in the `stl` subdirectory, on Thingiverse
+(<https://www.thingiverse.com/thing:4266457>) and on PrusaPrinters
+(<https://www.prusaprinters.org/prints/28714-truly-touchless-parametric-no-touch-tool>).
+
 Usage, printing and assembly
 ============================
 

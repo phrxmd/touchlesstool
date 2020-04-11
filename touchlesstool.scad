@@ -1,11 +1,14 @@
-/** Parametric no-touch tool
+/** "Truly touchless" parametric no-touch tool
   * 
   * Designed to open doors, push buttons, pick up bags etc.
-  * without touching them, and without touching the surfaces
-  * that do touch them ("no-touch").
+  * without touching them, and (importantly) without touching the surfaces
+  * that do touch them ("no-touch"). The actual tool body is hidden
+  * in a sleeve, can be extended with a knob and locked in place. The tool
+  * itself consists of a hook, two points at somewhat different angles,
+  * a short straight front section and a larger straight back blade.
   *
-  * Consists of four parts:
-  * - tool body (with hook and tip),
+  * The 3D model consists of four parts:
+  * - tool body (with hook and points ),
   * - tool sleeve (with slot for sliding it in and out),
   * - end cap (for closing it at the bottom, possibly attaching
   *   the tool body to the sleeve with a rubber band to let it
@@ -14,13 +17,41 @@
   *   hold it together.
   *
   * Shape and dimensions are parametric and widely customizable. 
-  * In fact, maybe *too* customizable - some of the options generate
-  * strange behaviour in OpenSCAD (see comments)
+  * In fact, maybe *too* customizable - some of the more exotic options 
+  * generate strange behaviour in OpenSCAD (see comments), and I don't
+  * expect this to work well in Thingiverse Customizer etc. as it gets quite
+  * resource-heavy.
+  *
+  * Known bugs and todos:
+  * - The model triggers a few bugs in OpenSCAD where assertions are thrown,
+  *   but it doesn't seem to impact the output.
+  * - OpenSCAD complains about the sleeve not being a valid 2-manifold.
+  *   The output is a valid STL, however.
+  *
+  * Todos:
+  * - Figure out a way to use the tool with capacitive touchscreens (ATMs etc.)
+  *   Maybe some wires in the tool tip?
   * 
   * Original non-parametric design by Elwin Alvarado,
   * https://www.prusaprinters.org/prints/27210-truly-touchless-no-touching-multi-toolhook
-  *
+  * Used with permission
+  * 
   * (C) 2020 Philipp Reichmuth, CC-BY-SA 4.0
+  *
+  * Version history:
+  * v1.1: Added keyring hole to endcap, fixed a few bugs
+  * v1.0: First published version
+  * v0.5: Diagonal locking slot for easier printing; added screw
+  *       hole to endcap 
+  * v0.4: Horizontal locking slot; screw-through bolt design; rubber band 
+  *       fixture v4: open space with rubber band posts
+  * v0.3: Added lanyard slot to endcap; rubber band fixture v3:
+  *       hooks on the left and right (too strong)  
+  * v0.2: Added bolt to model; rubber band fixture v2: round hooks
+  *       on front and back (slips too easily)
+  * v0.1: Initial design based on SCAD adaptation of Elwin Alavarado's
+  *       original idea. Added rubber band fixture v1: vertical slot,
+  *       ring around bolthole
   */
 
 /* [Model generation settings] */
@@ -43,9 +74,9 @@ ROUND_CIRCLES = true;
 $fn=(ROUND_CIRCLES) ? 50 : $fn;
 
 // Which models to generate
-GENERATE_BODY   = false;
-GENERATE_SLEEVE = false; 
-GENERATE_ENDCAP = false;
+GENERATE_BODY   = true;
+GENERATE_SLEEVE = true; 
+GENERATE_ENDCAP = true;
 GENERATE_BOLTS  = true;
 
 // Debugging of basic forms
@@ -54,10 +85,10 @@ GENERATE_SLOT_FORM = false;
 
 /* [Tool shape] */
 
-// Basic shape
+// Basic shape of the tool itself
 BODY_WIDTH    = 30;
 BODY_DEPTH    = 5;
-BODY_LENGTH   = 80;
+BODY_LENGTH   = 80; // LONG: 120;
 MIN_BODY_WALL = 1;      
 
 // Hook at the end of the tool
@@ -83,8 +114,13 @@ HOOK_CHAMFER = BODY_DEPTH * 0.4;
 // Angle of the top and rear edge
 EDGE_ANGLE  = 11.25;
 // Extend back edge if the hook ends up too thin at larger angles
-// Values <1 make it slimmer, values >1 extend it to the back
-EDGE_EXTEND = 0.98; 
+// or in longer bodies.
+// Values <1 shorten it forward (make it slimmer), 
+// values >1 extend it to the back
+EDGE_EXTEND = 0.98; // e.g. 1.2 for LONG version
+// Supplementary offset of the rear edge from the bottom
+// for very long blades
+EDGE_OFFSET = 40;
 // Tool back blade shape: BODY_DEPTH/2 gives a sharp edge,
 // lower values leave a flat portion at the back of the blade,
 // and setting it to CHAMFER gives a flat edge with the same 
@@ -100,12 +136,21 @@ HOLE_POS = 20;
 
 /* [End cap] */
 
-// Fixed chamfer at the bottom. 1/3 width gives a nice form.
-CHAMFER_CAP   = BODY_DEPTH/3; 
+// Chamfer the bottom to round it of a little bit. 
+// BODY_DEPTH/3 or BODY_DEPTH/2 gives an ergonomically nice form.
+// Setting it to CHAMFER will apply the same chamfer as everywhere.
+CHAMFER_CAP   = BODY_DEPTH/2; // CHAMFER; 
 
-// Slot through end cap: width
-CAP_SLOT_WIDTH = 10;
-CAP_SLOT_THICKNESS = 3;
+// Fixture for attaching the end cap through something
+// - none: no fixture
+// - slot: a rectangular slot
+// - hole: a circular hole
+ATTACHMENT_STYLE = "slot";
+// Slot through end cap for a lanyard: width and height
+CAP_SLOT_WIDTH  = 10;
+CAP_SLOT_HEIGHT = 3;
+// Hole through the end cap for attaching a key ring
+CAP_HOLE_DIA    = 5;
 
 // Fixing the end cap. Either rely on the rubber band,
 // glue the end cap in, or add a screw.
@@ -131,12 +176,11 @@ CAP_INSET     = CAP_SCREW
                   ? 2*CAP_SCREW_STANDOFF+(CAP_HEAD_DIA)/2+CAP_SCREW_DIA/2
                   : 3; 
 // Height of the actual end cap
-CAP_THICKNESS = 6;
+CAP_HEIGHT = 6;
 // Minimal wall strength around cut-out slots
 CAP_MIN_WALL  = 1; 
 // Gap between end cap and sleeve for a snug fit
 CAP_GAP       = 0.1;
-
 
 // Calculated depth of screw blocks, needed for shaping the sleeve
 // and endcap. Using the same calculated values here helps avoid errors
@@ -159,7 +203,7 @@ SLEEVE_OVERHANG  = 3;
 // Sleeve should fit the tool body after the cap is inserted
 SLEEVE_LENGTH    = BODY_LENGTH+SLEEVE_OVERHANG+CAP_INSET;
 // Material thickness of the sleeve
-SLEEVE_THICKNESS = 1.5;
+SLEEVE_THICKNESS = 1.5; // MAXSEC: 3;  
 // Gap between sleeve and tool: should move, but not wobble
 SLEEVE_GAP       = 0.5;
 
@@ -192,11 +236,10 @@ SLOT_BACK_FACTOR  = 0.5;
 SLOT_DIAG = true;
 // SLOT_LEFT_FACTOR    = 0.0; // Currently doesn't work well
 
-
 // Serrated back edge for easier grip and asymmetry
 // Spacing between grooves
 GROOVE_SPACING = 1.5;
-// Depth of grooves
+// Depth of grooves. Set to 0 for no grooves.
 GROOVE_DEPTH = 0.5;
 // Fraction of tool width to be grooved
 GROOVE_WIDTH_FACTOR = 3; 
@@ -237,7 +280,7 @@ GROOVE_WIDTH_FACTOR = 3;
 //       pair of thin bolts that are split lengthwise, ideally with 
 //       asymmetrical halves so that the pair can be glued together not only
 //       at the tips.
-BOLT_TYPE = "pair";
+BOLT_TYPE = "pair"; // MAXSEC: "knob": 
 
 // Diameter of the knob
 KNOB_DIA       = 15;
@@ -265,7 +308,7 @@ SCREW_NUT_FACES  = (SCREW_DIA != 0) ? 6 : 0;
 // Depth of nut slot in the outer knob
 SCREW_NUT_DEPTH  = (SCREW_DIA != 0) ? 3 : 0;
 
-/* [Hidden */
+/* [Hidden] */
 
 /* Generate and place the actual parts */
 
@@ -384,28 +427,28 @@ module sleeve() {
   //shorthand
   c=CHAMFER;
 
-  hole_thickness = BODY_DEPTH + 2*SLEEVE_GAP;
+  hole_depth = BODY_DEPTH + 2*SLEEVE_GAP;
   hole_width = BODY_WIDTH + 2*SLEEVE_GAP;
   
-  overall_thickness = hole_thickness + 2*SLEEVE_THICKNESS;
+  overall_depth = hole_depth + 2*SLEEVE_THICKNESS;
   overall_width = hole_width + 2*SLEEVE_THICKNESS;
     
   difference() {
     // body form chamfered only at the top
-    bodyForm(overall_thickness, overall_width, 
+    bodyForm(overall_depth, overall_width, 
              SLEEVE_LENGTH, c2=c);
     // cut out channel, chamfered only at the top
     translate([0, SLEEVE_THICKNESS, 0])
       difference() {
-        bodyForm(hole_thickness, hole_width, 
+        bodyForm(hole_depth, hole_width, 
                  SLEEVE_LENGTH, o2=c);
         if (CAP_SCREW) {
           // When cutting out the interior of the sleeve, leave two blocks 
           // where we will pass a screw though the sleeve and endcap.
-          translate([overall_width-overall_thickness-CAP_HEAD_DIA- 
+          translate([overall_width-overall_depth-CAP_HEAD_DIA- 
                      CAP_SCREW_STANDOFF,-SLEEVE_THICKNESS,0])
             {
-              // "Dront" block will hold a screw head
+              // "Front" block will hold a screw head
               // Width needs to be at least CAP_NUT_DIA+2*CAP_SCREW_STANDOFF,
               // But we can go all the way to the end here.
               cube([1000, // all the way to end
@@ -413,7 +456,7 @@ module sleeve() {
                     CAP_HEAD_DIA+CAP_SCREW_STANDOFF]);
               // "Back" block will hold screw nut
               translate([0,
-                         overall_thickness-BACK_SCREW_BLOCK,
+                         overall_depth-BACK_SCREW_BLOCK,
                          0])
                 cube([1000, // all the way to the end
                       BACK_SCREW_BLOCK,
@@ -422,51 +465,48 @@ module sleeve() {
         }
       }
     // cut out slot
-    translate([(overall_width-overall_thickness-SLOT_WIDTH)/2, 0, SLOT_POS])
+    translate([(overall_width-overall_depth-SLOT_WIDTH)/2, 0, SLOT_POS])
       rotate([0,-90,-90])
         union() {
           slotForm(SLEEVE_THICKNESS, SLOT_WIDTH, SLOT_LENGTH, 
                    // xl=SLOT_LEFT_FACTOR, // currently no left slots
                    xr=SLOT_RIGHT_FACTOR, sbf=SLOT_BACK_FACTOR, o1=c);
-          translate([0,0,overall_thickness-SLEEVE_THICKNESS]) 
+          translate([0,0,overall_depth-SLEEVE_THICKNESS]) 
             slotForm(SLEEVE_THICKNESS, SLOT_WIDTH, SLOT_LENGTH, 
                      // xl=SLOT_LEFT_FACTOR, // currently no left slots
                      xr=SLOT_RIGHT_FACTOR, sbf=SLOT_BACK_FACTOR, o2=c);
         };
     // cut out slot for passing the rubber band to the endcap
     // Extended to the top a little bit to compensate for the thickness of the material.
-    // This could be angled if we want it really elegang
-    translate([(overall_width-RUBBER_SLOT-overall_thickness)/2,0,0])
-        chamferCube(size=[RUBBER_SLOT, overall_thickness, 
+    // This could be angled if we want it really elegant
+    translate([(overall_width-RUBBER_SLOT-overall_depth)/2,0,0])
+        chamferCube(size=[RUBBER_SLOT, overall_depth, 
                           RUBBER_SLOT+SLEEVE_THICKNESS/2],cy2=c, cy3=c);
     // cut out hole and heads for endcap screw
     if (CAP_SCREW) {
-      translate([overall_width-overall_thickness-CAP_HEAD_DIA/2, 0, 
+      translate([overall_width-overall_depth-CAP_HEAD_DIA/2, 0, 
                  CAP_HEAD_DIA/2+CAP_SCREW_STANDOFF])
         rotate([-90,0,0])
         {
           // screw hole - needs $fn
-          cylinder(d=CAP_SCREW_DIA,h=overall_thickness, $fn=50);
+          cylinder(d=CAP_SCREW_DIA,h=overall_depth, $fn=50);
           // screw head
           cylinder(d=CAP_HEAD_DIA, h=CAP_HEAD_DEPTH, $fn=50);
           // screw nut
-          translate([0,0,overall_thickness-CAP_NUT_DEPTH])
+          translate([0,0,overall_depth-CAP_NUT_DEPTH])
             cylinder(d=CAP_NUT_DIA, h=CAP_NUT_DEPTH, $fn=6);        
         };
     };
   };
   
-  // insert block for endcap screw
-  
-  
   // Serrated front edge of the tool
-  groove_width=overall_thickness/GROOVE_WIDTH_FACTOR;
-  groove_offset=overall_thickness*(1-1/GROOVE_WIDTH_FACTOR)/2;
+  groove_width=overall_depth/GROOVE_WIDTH_FACTOR;
+  groove_offset=overall_depth*(1-1/GROOVE_WIDTH_FACTOR)/2;
   groove_length = SLOT_POS+SLOT_LENGTH-CAP_INSET; 
                   // was. SLEEVE_LENGTH-2*CAP_INSET;
   groove_count=floor(groove_length)/GROOVE_SPACING;
   actual_spacing=groove_length/groove_count;
-  translate([-overall_thickness/2, groove_offset, 
+  translate([-overall_depth/2, groove_offset, 
              ,CAP_INSET])
     for(i=[1:groove_count])
       translate([0,0,i*actual_spacing])  
@@ -474,24 +514,31 @@ module sleeve() {
           chamferCylinder(r=GROOVE_DEPTH,h=groove_width,
                           $fn=8,c=0.5);
   //put a single dot also on the side where the tool comes out
-  translate([-overall_thickness/2, groove_offset, 
+  translate([-overall_depth/2, groove_offset, 
              SLOT_LENGTH/2+SLEEVE_LENGTH/2+SLOT_POS/2])
     rotate([-90,0,0])
       chamferCylinder(r=GROOVE_DEPTH,h=groove_width,
                           $fn=8,c=0.5);
   
-  
   // Add triangles to identify front side
-  // Center on the middle of the slot
-  translate([(overall_width-overall_thickness)/2,
-              overall_thickness/2,SLOT_POS+SLOT_LENGTH/2])
-    // mirror above and below the slot 
-    mirror_copy([0,0,1])
+  // Top triangle: center on the middle of the space above the slot
+  translate([(overall_width-overall_depth)/2,
+              overall_depth/2,SLOT_POS/2+SLOT_LENGTH/2+SLEEVE_LENGTH/2])
       // mirror on front and back
       mirror_copy([0,1,0])
         // draw reference triangle above the slot
-        translate([0,-overall_thickness/2,
-                   SLEEVE_LENGTH/2-SLOT_POS/2])
+        translate([0,-overall_depth/2,0])
+          rotate([90,180,0])
+            // triangle prism = cylinder with 3 faces
+            chamferCylinder(d=SLOT_WIDTH*sqrt(2),
+                            h=TRIANGLE_DEPTH,c2=c,$fn=3);
+  // Bottom triangle: center on the middle of the space below the slot
+  translate([(overall_width-overall_depth)/2,
+              overall_depth/2,SLOT_POS/2+RUBBER_SLOT/2+SLEEVE_THICKNESS/4])
+      // mirror on front and back
+      mirror_copy([0,1,0])
+        // draw reference triangle above the slot
+        translate([0,-overall_depth/2,0])
           rotate([90,180,0])
             // triangle prism = cylinder with 3 faces
             chamferCylinder(d=SLOT_WIDTH*sqrt(2),
@@ -499,7 +546,6 @@ module sleeve() {
 };
 
 // end cap
-
 module endcap() {
   // shorthand
   c=CHAMFER;
@@ -510,27 +556,32 @@ module endcap() {
   // dimensions for part of cap that goes into the sleeve
   inset_depth = BODY_DEPTH-2*CAP_GAP;
   inset_width = BODY_WIDTH-2*CAP_GAP;
-  // center slot for saving material
+  // longitudinal slots for saving material
+  // they have different depths, depending on whether we have
+  // a screw fixture or not, and depending on which side the
+  // lanyard slot is on.
   slot_depth  = inset_depth - 2*CAP_MIN_WALL;
   slot_width  = (cap_width-cap_depth-HOLE_DIA)/2 - CAP_MIN_WALL;
-  slot_height  = CAP_THICKNESS+CAP_INSET-CAP_MIN_WALL;
-  slot_z2      = CHAMFER_CAP+CAP_SLOT_THICKNESS+CAP_MIN_WALL+c;
-  slot_height2 = CAP_THICKNESS+CAP_INSET-slot_z2;
+  slot_height = CAP_HEIGHT+CAP_INSET-CAP_MIN_WALL;
+  cap_hole_height = (ATTACHMENT_STYLE == "slot") ? CAP_SLOT_HEIGHT :
+                    (ATTACHMENT_STYLE == "hole") ? CAP_HOLE_DIA : 0;
+  slot_bottom = CHAMFER_CAP+cap_hole_height+CAP_MIN_WALL+c;
+  slot_height_shallow = CAP_HEIGHT+CAP_INSET-slot_bottom;
     
   difference() {
     union() {
       // lower half of cap
       translate([cap_depth/2,cap_depth/2,0])
-        chamferCylinder(d=cap_depth, h=CAP_THICKNESS, c1=CHAMFER_CAP);
+        chamferCylinder(d=cap_depth, h=CAP_HEIGHT, c1=CHAMFER_CAP);
       translate([cap_depth/2,0,0])
         chamferCube(size=[cap_width-cap_depth, cap_depth, 
-          CAP_THICKNESS], cx1=CHAMFER_CAP, cx2=CHAMFER_CAP);
+          CAP_HEIGHT], cx1=CHAMFER_CAP, cx2=CHAMFER_CAP);
       translate([cap_width-cap_depth/2,cap_depth/2,0])
-        chamferCylinder(d=cap_depth, h=CAP_THICKNESS, c1=CHAMFER_CAP);
+        chamferCylinder(d=cap_depth, h=CAP_HEIGHT, c1=CHAMFER_CAP);
       // upper half of cap (inset)
       translate([(cap_width-inset_width)/2,
                  (cap_depth-inset_depth)/2,
-                 CAP_THICKNESS]) {
+                 CAP_HEIGHT]) {
         translate([inset_depth/2, inset_depth/2, 0])
           chamferCylinder(d=inset_depth, h=CAP_INSET, c2=CHAMFER);
         if (CAP_SCREW) {
@@ -547,9 +598,12 @@ module endcap() {
           };
       };
       if (CAP_SCREW) {
-      translate([inset_width-inset_depth/2-CAP_HEAD_DIA+2*CAP_SCREW_STANDOFF,
+      // Fixture for a screw running through the sleeve that fixes the
+      // endcap
+      translate([//inset_width-inset_depth/2-CAP_HEAD_DIA+2*CAP_SCREW_STANDOFF,
+                 cap_width-cap_depth/2-CAP_HEAD_DIA,
                  FRONT_SCREW_BLOCK+CAP_GAP,
-                 CAP_THICKNESS])
+                 CAP_HEIGHT])
         chamferCube(size=[CAP_HEAD_DIA,
                    cap_depth-FRONT_SCREW_BLOCK-BACK_SCREW_BLOCK-2*CAP_GAP,
                    CAP_HEAD_DIA/2+CAP_SCREW_DIA/2+2*CAP_SCREW_STANDOFF],
@@ -559,21 +613,35 @@ module endcap() {
     };
     // cut out rubber band block from inset
     translate([(cap_width-HOLE_DIA)/2,0, 
-               CAP_THICKNESS])
+               CAP_HEIGHT])
       cube(size=[HOLE_DIA, cap_depth, CAP_INSET]);
     // cut out rubber band slot around cap
     translate([(cap_width-RUBBER_SLOT)/2,0,0]) {
       chamferCube(size=[RUBBER_SLOT,RUBBER_SLOT,     
-        CAP_THICKNESS], o2=c);
+        CAP_HEIGHT], o2=c);
       chamferCube(size=[RUBBER_SLOT, cap_depth, RUBBER_SLOT]);
       translate([0,cap_depth-RUBBER_SLOT,0])
         chamferCube(size=[RUBBER_SLOT, RUBBER_SLOT, 
-           CAP_THICKNESS], o2=c);
+           CAP_HEIGHT], o2=c);
     }
-    // cut sideways slot for attaching a lanyard
-    translate([cap_width-cap_depth/2-CAP_SLOT_WIDTH,0,CHAMFER_CAP])
-      chamferCube(size=[CAP_SLOT_WIDTH,cap_depth,
-                   CAP_SLOT_THICKNESS],oy1=c,oy2=c);
+    // Attachment holes in the end cap
+    if (ATTACHMENT_STYLE=="slot") {
+      // cut perpendicular slot for attaching a lanyard
+      cap_slot_bottom = (CHAMFER_CAP > CAP_HEIGHT-CAP_SLOT_HEIGHT-CAP_MIN_WALL)
+                           ? CAP_HEIGHT-CAP_SLOT_HEIGHT-CAP_MIN_WALL
+                           : (CHAMFER_CAP > CAP_MIN_WALL)
+                             ? CHAMFER_CAP
+                             : CAP_MIN_WALL;
+      translate([cap_width-cap_depth/2-CAP_SLOT_WIDTH,0,cap_slot_bottom])
+        chamferCube(size=[CAP_SLOT_WIDTH,cap_depth,
+                          CAP_SLOT_HEIGHT],oy1=c,oy2=c);
+    } 
+    else if (ATTACHMENT_STYLE=="hole") {
+      // cut circular hole for attaching a key ring
+      translate([cap_width-cap_depth/2-CAP_HOLE_DIA/2,0,CAP_HEIGHT/2])
+        rotate([-90,0,0])
+          chamferCylinder(d=CAP_HOLE_DIA,h=cap_depth,o=0.5);
+    };
     // cut slots into the inset to save some material
     translate([cap_depth/2, cap_depth/2, CAP_MIN_WALL])
       chamferCylinder(d=slot_depth, h=slot_height, o2=c);
@@ -582,22 +650,22 @@ module endcap() {
     if (CAP_SCREW) {
       // Cut screw hole into block
       translate([cap_width-cap_depth/2-CAP_HEAD_DIA/2,0,
-                 CAP_THICKNESS+CAP_HEAD_DIA/2+CAP_SCREW_STANDOFF]) 
+                 CAP_HEIGHT+CAP_HEAD_DIA/2+CAP_SCREW_STANDOFF]) 
         rotate([-90,0,0])
           cylinder(d=CAP_SCREW_DIA,h=cap_depth,$fn=50);  
     } else {
       // cut slot into the back inset - needs to be lower
       translate([(cap_width+HOLE_DIA)/2+CAP_MIN_WALL,
-                 (cap_depth-slot_depth)/2, slot_z2])
-        chamferCube([slot_width, slot_depth, slot_height2], oz2=c);
-      translate([cap_width-cap_depth/2, cap_depth/2, slot_z2])
-        chamferCylinder(d=slot_depth, h=slot_height2, o2=c);
+                 (cap_depth-slot_depth)/2, slot_bottom])
+        chamferCube([slot_width, slot_depth, slot_height_shallow], oz2=c);
+      translate([cap_width-cap_depth/2, cap_depth/2, slot_bottom])
+        chamferCylinder(d=slot_depth, h=slot_height_shallow, o2=c);
     };
   }; 
 };
 
-// Bolt placement that allows cutting bolts in half and 
-// laying them flat
+// Bolt placement that allows placing bolts either verticlly, or
+// cutting them in half and laying the halves flat
 module placeBolts() 
 {
   bolt_len = BODY_DEPTH+2*(SLEEVE_GAP+SLEEVE_THICKNESS+KNOB_GAP);
@@ -710,7 +778,7 @@ module outer_bolt(cap_dia, cap_thck, bolt_dia,
       chamferCylinder(d=hole_dia,
                      h=cap_thck,
                      o1=chamfer);
-  // Screw nut head
+  // Captive screw or nut head
   if (nut_dia != 0)
       chamferCylinder(d=nut_dia,
                      h=nut_dpth,
@@ -739,7 +807,7 @@ module inner_bolt(cap_dia, cap_thck, bolt_dia,
         chamferCylinder(d=hole_dia,
                        h=bolt_len+cap_thck,
                        o=chamfer);
-    // Remove screw head
+    // Captive screw head
     if (nut_dia != 0)
         chamferCylinder(d=nut_dia,
                          h=nut_dpth,
@@ -748,9 +816,10 @@ module inner_bolt(cap_dia, cap_thck, bolt_dia,
   };
 };
 
-// Form elements that repeat 
+// Repeating basic form elements
 
-// Basic slot form with chamfers and/or overhangs
+// Basic form for the vertical slot, with chamfers, overhangs and
+// sideways extensions for locking
 module slotForm(d, w, l, xl=0, xr=0, sbf=0.5, o1, o2, c1, c2)
 {
   translate([w/2,w/2,0])
@@ -812,7 +881,6 @@ module slotForm(d, w, l, xl=0, xr=0, sbf=0.5, o1, o2, c1, c2)
 
 // Basic body form of the device (used for body and sleeve)
 // Chamfering supported separately at top and bottom
-// Overhangs get too complex
 module bodyForm(d, w, l, c, c1, c2, o, o1, o2)
 {
       translate([0, d/2, 0])
@@ -1040,7 +1108,8 @@ module mirror_copy(v = [1, 0, 0]) {
 // a function to return the first parameter that is not "undef".
 // This could be a much more elegant recursive function over a list,
 // and a function literal for the test, but that wouldn't work in the
-// old version of OpenSCAD available in Ubuntu.
+// old version of OpenSCAD available in Ubuntu, so I'm not designing
+// this to be pretty.
 function firstOf(a, b, c, d) =
     a!=undef ? a : 
     b!=undef ? b : 

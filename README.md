@@ -279,19 +279,22 @@ To do
 Version history
 ===============
 
--   v0.1: Initial design based on SCAD adaptation of Elwin Alavarado\'s
+1.  v0.1: Initial design based on SCAD adaptation of Elwin Alavarado\'s
     original idea. Added rubber band fixture v1: vertical slot, ring
     around bolthole
--   v0.2: Added bolt to model; rubber band fixture v2: round hooks on
+2.  v0.2: Added bolt to model; rubber band fixture v2: round hooks on
     front and back (slips too easily)
--   v0.3: Added lanyard slot to endcap; rubber band fixture v3: hooks on
+3.  v0.3: Added lanyard slot to endcap; rubber band fixture v3: hooks on
     the left and right (too strong)
--   v0.4: Horizontal locking slot; screw-through bolt design; rubber
+4.  v0.4: Horizontal locking slot; screw-through bolt design; rubber
     band fixture v4: open space with rubber band posts
--   v0.5: Diagonal locking slot for easier printing; added screw hole to
+5.  v0.5: Diagonal locking slot for easier printing; added screw hole to
     endcap
--   v1.0: First published version
--   v1.1: Added keyring hole to endcap, fixed a few bugs
+6.  v1.0: First published version
+7.  v1.1: Added keyring hole to endcap, based on [this
+    idea](https://thingiverse.com/thing:4275480) by [Matt
+    Bordoni](https://www.thingiverse.com/matador/about), fixed a few
+    bugs
 
 Attribution and license
 =======================

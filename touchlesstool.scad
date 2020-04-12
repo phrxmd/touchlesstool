@@ -39,6 +39,7 @@
   * (C) 2020 Philipp Reichmuth, CC-BY-SA 4.0
   *
   * Version history:
+  * v1.2: Added debugging for parts placement below Z.
   * v1.1: Added keyring hole to endcap, fixed a few bugs
   * v1.0: First published version
   * v0.5: Diagonal locking slot for easier printing; added screw
@@ -82,6 +83,16 @@ GENERATE_BOLTS  = true;
 // Debugging of basic forms
 GENERATE_BODY_FORM = false;
 GENERATE_SLOT_FORM = false;
+
+// Debugging of parts placements
+// See if there are parts extending below the build plate.
+TEST_BELOW_Z = false;
+// Trim any parts that extend below the build plate.
+// This can happen in the STL export due to rounding errors
+// in the various transformations. However, it also has the
+// potential to damage your objects if the amounts are non-
+// infinitesimal, so better test with TEST_BELOW_Z first.
+TRIM_BELOW_Z = false;
 
 /* [Tool shape] */
 
@@ -130,7 +141,7 @@ EDGE_OFFSET = 40;
 EDGE_CHAMFER = BODY_DEPTH/2;
 
 // Diameter of the central bolt hole
-HOLE_DIA = 6;
+HOLE_DIA = 6; // 3.6 for MAXSEC version with M3 bolts, otherwise 6mm
 // Bolt hole position, measured from the bottom of the tool
 HOLE_POS = 20;
 
@@ -176,7 +187,7 @@ CAP_INSET     = CAP_SCREW
                   ? 2*CAP_SCREW_STANDOFF+(CAP_HEAD_DIA)/2+CAP_SCREW_DIA/2
                   : 3; 
 // Height of the actual end cap
-CAP_HEIGHT = 6;
+CAP_HEIGHT = 6; // MAXSEC and thick-sleeve versions need more, maybe 8
 // Minimal wall strength around cut-out slots
 CAP_MIN_WALL  = 1; 
 // Gap between end cap and sleeve for a snug fit
@@ -203,7 +214,7 @@ SLEEVE_OVERHANG  = 3;
 // Sleeve should fit the tool body after the cap is inserted
 SLEEVE_LENGTH    = BODY_LENGTH+SLEEVE_OVERHANG+CAP_INSET;
 // Material thickness of the sleeve
-SLEEVE_THICKNESS = 1.5; // MAXSEC: 3;  
+SLEEVE_THICKNESS = 1.5; // MAXSEC: 3, otherwise 1.5  
 // Gap between sleeve and tool: should move, but not wobble
 SLEEVE_GAP       = 0.5;
 
@@ -312,17 +323,29 @@ SCREW_NUT_DEPTH  = (SCREW_DIA != 0) ? 3 : 0;
 
 /* Generate and place the actual parts */
 
-if (GENERATE_BOLTS) placeBolts();
-if (GENERATE_ENDCAP)
-  translate([-KNOB_DIA/2,-BODY_WIDTH-1.5*BODY_DEPTH,0])
-    endcap();
-if (GENERATE_BODY)
-  translate([BODY_WIDTH*1.5,0,0])
-    rotate([-90,0,0])
-      body();
-if (GENERATE_SLEEVE)
-  translate([0,BODY_WIDTH+BODY_DEPTH,0])
-    sleeve();
+difference() {
+  intersection() {
+    union() {
+      if (GENERATE_BOLTS) placeBolts();
+      if (GENERATE_ENDCAP)
+        translate([-KNOB_DIA/2,-BODY_WIDTH-1.5*BODY_DEPTH,0])
+          endcap();
+      if (GENERATE_BODY)
+        translate([BODY_WIDTH*1.5,0,BODY_DEPTH])
+          rotate([-90,0,0])
+            body();
+      if (GENERATE_SLEEVE)
+        translate([0,BODY_WIDTH+BODY_DEPTH,0])
+          sleeve();
+    };
+    if (TEST_BELOW_Z) 
+      translate([-500,-500,-5])
+        cube(size=[1000,1000,5]); 
+  };
+  if (TRIM_BELOW_Z) 
+    translate([-500,-500,-500])
+      cube(size=[1000,1000,500]); 
+};  
 
 // Debggging
 if (GENERATE_BODY_FORM)
@@ -521,28 +544,30 @@ module sleeve() {
                           $fn=8,c=0.5);
   
   // Add triangles to identify front side
-  // Top triangle: center on the middle of the space above the slot
-  translate([(overall_width-overall_depth)/2,
-              overall_depth/2,SLOT_POS/2+SLOT_LENGTH/2+SLEEVE_LENGTH/2])
-      // mirror on front and back
-      mirror_copy([0,1,0])
-        // draw reference triangle above the slot
-        translate([0,-overall_depth/2,0])
-          rotate([90,180,0])
-            // triangle prism = cylinder with 3 faces
-            chamferCylinder(d=SLOT_WIDTH*sqrt(2),
-                            h=TRIANGLE_DEPTH,c2=c,$fn=3);
-  // Bottom triangle: center on the middle of the space below the slot
-  translate([(overall_width-overall_depth)/2,
-              overall_depth/2,SLOT_POS/2+RUBBER_SLOT/2+SLEEVE_THICKNESS/4])
-      // mirror on front and back
-      mirror_copy([0,1,0])
-        // draw reference triangle above the slot
-        translate([0,-overall_depth/2,0])
-          rotate([90,180,0])
-            // triangle prism = cylinder with 3 faces
-            chamferCylinder(d=SLOT_WIDTH*sqrt(2),
-                            h=TRIANGLE_DEPTH,c2=c,$fn=3);
+  if(PLACE_TRIANGLES) {
+    // Top triangle: center on the middle of the space above the slot
+    translate([(overall_width-overall_depth)/2,
+                overall_depth/2,SLOT_POS/2+SLOT_LENGTH/2+SLEEVE_LENGTH/2])
+        // mirror on front and back
+        mirror_copy([0,1,0])
+          // draw reference triangle above the slot
+          translate([0,-overall_depth/2,0])
+            rotate([90,180,0])
+              // triangle prism = cylinder with 3 faces
+              chamferCylinder(d=SLOT_WIDTH*sqrt(2),
+                              h=TRIANGLE_DEPTH,c2=c,$fn=3);
+    // Bottom triangle: center on the middle of the space below the slot
+    translate([(overall_width-overall_depth)/2,
+                overall_depth/2,SLOT_POS/2+RUBBER_SLOT/2+SLEEVE_THICKNESS/4])
+        // mirror on front and back
+        mirror_copy([0,1,0])
+          // draw reference triangle above the slot
+          translate([0,-overall_depth/2,0])
+            rotate([90,180,0])
+              // triangle prism = cylinder with 3 faces
+              chamferCylinder(d=SLOT_WIDTH*sqrt(2),
+                              h=TRIANGLE_DEPTH,c2=c,$fn=3);
+  };
 };
 
 // end cap

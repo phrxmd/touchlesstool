@@ -250,19 +250,20 @@ Ubuntu) and 19.05 and it works on both.
 
 * Version history
 
-1. v0.1: Initial design based on SCAD adaptation of Elwin Alavarado's original
-   idea. Added rubber band fixture v1: vertical slot, ring around bolthole
-2. v0.2: Added bolt to model; rubber band fixture v2: round hooks on front and
-   back (slips too easily)
-3. v0.3: Added lanyard slot to endcap; rubber band fixture v3: hooks on the left
-   and right (too strong)
-4. v0.4: Horizontal locking slot; screw-through bolt design; rubber band fixture
-   v4: open space with rubber band posts
-5. v0.5: Diagonal locking slot for easier printing; added screw hole to endcap
-6. v1.0: First published version
-7. v1.1: Added keyring hole to endcap, based on [[https://thingiverse.com/thing:4275480][this idea]] by [[https://www.thingiverse.com/matador/about][Matt Bordoni]], fixed
-   a few bugs
-
+- v0.1: Initial design based on SCAD adaptation of Elwin Alavarado's original
+  idea. Added rubber band fixture v1: vertical slot, ring around bolthole
+- v0.2: Added bolt to model; rubber band fixture v2: round hooks on front and
+  back (slips too easily)
+- v0.3: Added lanyard slot to endcap; rubber band fixture v3: hooks on the left
+  and right (too strong)
+- v0.4: Horizontal locking slot; screw-through bolt design; rubber band fixture
+  v4: open space with rubber band posts
+- v0.5: Diagonal locking slot for easier printing; added screw hole to endcap
+- v1.0: First published version
+- v1.1: Added keyring hole to endcap, based on [[https://thingiverse.com/thing:4275480][this idea]] by [[https://www.thingiverse.com/matador/about][Matt Bordoni]], fixed
+  a few bugs
+- v1.2: Added debugging for parts placement below Z
+  
 * Attribution and license
 
 The original idea comes from a non-parametric Fusion 360 design by Elwin
@@ -271,4 +272,4 @@ Alvarado [[https://www.prusaprinters.org/prints/27210-truly-touchless-no-touchin
 The GitHub repository for this model is [[https://github.com/phrxmd/touchlesstool]].
 
 (C) 2020 Philipp Reichmuth. Published under the Creative Commons
-Attribution-ShareAlike 4.0 International license (see LICENSE.md).
+Attribution-ShareAlike 4.0 International license (see [[file:LICENSE.md][LICENSE.md]]).
